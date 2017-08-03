@@ -1,0 +1,137 @@
+﻿<html>
+
+<body>
+    <form name="calculator">
+
+        <h2>Ввод</h2>
+        <input type="text" id="editTerm" name="ans" value=""><br>
+        <input type="button" value="7" onClick="document.calculator.ans.value+='7'">
+        <input type="button" value="8" onClick="document.calculator.ans.value+='8'">
+        <input type="button" value="9" onClick="document.calculator.ans.value+='9'">
+        <input type="button" id="divId" value="/"><br>
+        <input type="button" value="4" onClick="document.calculator.ans.value+='4'">
+        <input type="button" value="5" onClick="document.calculator.ans.value+='5'">
+        <input type="button" value="6" onClick="document.calculator.ans.value+='6'">
+        <input type="button" id="multId" value="*"><br>
+        <input type="button" value="1" onClick="document.calculator.ans.value+='1'">
+        <input type="button" value="2" onClick="document.calculator.ans.value+='2'">
+        <input type="button" value="3" onClick="document.calculator.ans.value+='3'">
+        <input type="button" id="subtrId" value="-"><br>
+        <input type="button" value="0" onClick="document.calculator.ans.value+='0'">
+        <input type="reset" value="Сброс">
+        <input type="button" id="plusId" value="+">
+        <button id="Calc">=</button>
+
+
+        <h2>История вычислений</h2>
+        <div id="tableBlock"></div>
+
+
+        @section scripts
+{
+            <script type="text/javascript">
+
+                $(document).ready(function () {
+
+                    GetAllCalcs();
+                    $("#plusId").click(function (event) {
+                        event.preventDefault();
+                        if (!document.calculator.ans.value) {
+                            document.calculator.ans.value += '0';
+                        }
+                        document.calculator.ans.value += '+';
+
+                    });
+                    $("#subtrId").click(function (event) {
+                        event.preventDefault();
+                        if (!document.calculator.ans.value) {
+                            document.calculator.ans.value += '0';
+                        }
+                        document.calculator.ans.value += '-';
+
+                    });
+                    $("#multId").click(function (event) {
+                        event.preventDefault();
+                        if (!document.calculator.ans.value) {
+                            document.calculator.ans.value += '0';
+                        }
+                        document.calculator.ans.value += '*';
+
+                    });
+                    $("#divId").click(function (event) {
+                        event.preventDefault();
+                        if (!document.calculator.ans.value) {
+                            document.calculator.ans.value += '0';
+                        }
+                        document.calculator.ans.value += '/';
+
+                    });
+                    $("#Calc").click(function (event) {
+                        event.preventDefault();
+                        CalcRes();
+                        document.calculator.ans.value = "";
+                        
+                    });
+                });
+
+                function CalcRes() {
+
+                    var calc = {
+                        Term: $('#editTerm').val()
+                    };
+
+                    $.ajax({
+                        url: '/api/values',
+                        type: 'POST',
+                        data: JSON.stringify(calc),
+                        contentType: "application/json;charset=utf-8",
+                        success: function (data) {
+                            GetAllCalcs();
+                        },
+                        error: function (x, y, z) {
+                            alert(x + '\n' + y + '\n' + z);
+                        }
+                    });
+                }
+
+                function GetAllCalcs() {
+
+
+                    $.ajax({
+                        url: '/api/values',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            WriteResponse(data);
+                        },
+                        error: function (x, y, z) {
+                            alert(x + '\n' + y + '\n' + z);
+                        }
+                    });
+                }
+
+                function WriteResponse(calcs) {
+                    var strResult = "<table><th>ID</th><th>Выражение</th><th>Значение</th><th>Операнды</th><th>Операции</th><th>Время</th><th>IP пользователя</th>";
+                    $.each(calcs, function (index, calc) {
+                        strResult += "<tr><td>" + calc.Id + "</td><td> " + calc.Term + "</td><td>" +
+                           calc.Res + "</td><td> " + calc.Operands + "</td><td> " + calc.Operations + "</td><td>" +
+                        calc.TimeofCalc + "</td><td>" + calc.UserIp + "</td></tr>";
+                    });
+                    strResult += "</table>";
+                    $("#tableBlock").html(strResult);
+
+                }
+
+
+
+
+
+
+
+            </script>
+        }
+    </form>
+
+</body>
+
+</html>
